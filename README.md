@@ -1,14 +1,17 @@
 # Merge Simulations
 
-A post processing tool for merging simulations with GiD. From two simulations with dynamic meshes, a third simulation will be generated.
+A post processing tool for merging simulations with [GiD](https://www.gidsimulation.com/). From two simulations with dynamic meshes, a third simulation will be generated.
 
 Each source simulation should be stored in a folder, the node and element numbering should be different from one simulation to the other and the time labels should be the shared across the simulations. If you want to merge more simulations, it can be done recursively.
 
 ## Usage
 
-1. Download this
-2. Type this command in GiD `-np- source /path/to/merge.tcl` and follow the instructions
-3. From GiD, click open multiple to read the new files
+1. Download
+2. Type the following command in GiD: `-np- source /path/to/merge.tcl`
+3. Fill this form and click *merge*:
+
+   ![form](doc/form.png)
+4. From GiD, click *open multiple* to read the new files
 
 ## Examples
 
@@ -33,11 +36,9 @@ project
 
 Then, a possible configuration could be the next:
 
-**FirstPath**: first_simulation/gid_output
-
-**SecondPath**: second_simulation/gid_output
-
-**ResultPath**: merged_simulation
+- **FirstPath**: first_simulation/gid_output
+- **SecondPath**: second_simulation/gid_output
+- **ResultPath**: merged_simulation
 
 And the resulting simulation will be written to a new folder:
 ```
