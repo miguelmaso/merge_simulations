@@ -14,20 +14,21 @@ Each source simulation should be stored in a folder, the node and element number
 
 Imagine we have the following structure:
 ```
-first_simulation
-├── gid_output
-│   ├── first_simulation_0.post.bin
-│   ├── first_simulation_0.1.post.bin
-│   ├── first_simulation_0.2.post.bin
+project
+├── first_simulation
+│   ├── gid_output
+│   │   ├── first_simulation_0.post.bin
+│   │   ├── first_simulation_0.1.post.bin
+│   │   ├── first_simulation_0.2.post.bin
+│   │   └── ...
 │   └── ...
-└── ...
-second_simulation
-├── gid_output
-│   ├── second_simulation_0.post.bin
-│   ├── second_simulation_0.1.post.bin
-│   ├── second_simulation_0.2.post.bin
-│   └── ...
-└── ...
+└── second_simulation
+    ├── gid_output
+    │   ├── second_simulation_0.post.bin
+    │   ├── second_simulation_0.1.post.bin
+    │   ├── second_simulation_0.2.post.bin
+    │   └── ...
+    └── ...
 ```
 
 Then, a possible configuration could be the next:
@@ -39,16 +40,17 @@ Then, a possible configuration could be the next:
 **ResultPath**: merged_simulation
 
 And the resulting simulation will be written to a new folder:
-```dir
-first_simulation
-└── ...
-second_simulation
-└── ...
-merged_simulation
-├── merged_simulation_0.post.bin
-├── merged_simulation_0.1.post.bin
-├── merged_simulation_0.2.post.bin
-└── ...
+```
+project
+├── first_simulation
+│   └── ...
+├── second_simulation
+│   └── ...
+└── merged_simulation
+    ├── merged_simulation_0.post.bin
+    ├── merged_simulation_0.1.post.bin
+    ├── merged_simulation_0.2.post.bin
+    └── ...
 ```
 
 What happens if one simulation takes longer than the other? This marco will combine each time step where it is present in both simulations. So, if one simulation takes longer, the extra time steps will be ignored. In that case, it is possible to specify a **DefaultTime** in order to extend the shorter simulation.
