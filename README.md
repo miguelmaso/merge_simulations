@@ -36,9 +36,9 @@ project
 
 Then, a possible configuration could be the next:
 
-- **FirstPath**: first_simulation/gid_output
-- **SecondPath**: second_simulation/gid_output
-- **ResultPath**: merged_simulation
+- **First path**: first_simulation/gid_output
+- **Second path**: second_simulation/gid_output
+- **Result path**: merged_simulation
 
 And the resulting simulation will be written to a new folder:
 ```
@@ -54,7 +54,7 @@ project
     └── ...
 ```
 
-What happens if one simulation takes longer than the other? This marco will combine each time step where it is present in both simulations. So, if one simulation takes longer, the extra time steps will be ignored. In that case, it is possible to specify a **DefaultTime** in order to extend the shorter simulation.
+What happens if one simulation is longer than the other? This marco will combine each time step where it is present in both simulations. So, if one simulation is longer, the extra time steps will be ignored. In that case, it is possible to specify a **DefaultTime** in order to extend the shorter simulation.
 
 In this animation, the first simulation (a landslide) has been extended with the initial configuration. Furthermore, there is a triple combination (recursive) of post-process results: the landslide simulation, the free surface simulation and the bottom mesh.
 
