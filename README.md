@@ -12,13 +12,54 @@ Each source simulation should be stored in a folder, the node and element number
 
 ## Examples
 
-In this example there is a triple combination of post-process results: the PFEM simulation, the free surface mesh and the bottom mesh.
+Imagine we have the following structure:
+```
+first_simulation
+├── gid_output
+│   ├── first_simulation_0.post.bin
+│   ├── first_simulation_0.1.post.bin
+│   ├── first_simulation_0.2.post.bin
+│   └── ...
+└── ...
+second_simulation
+├── gid_output
+│   ├── second_simulation_0.post.bin
+│   ├── second_simulation_0.1.post.bin
+│   ├── second_simulation_0.2.post.bin
+│   └── ...
+└── ...
+```
+
+Then, a possible configuration could be the next:
+
+**FirstPath**: first_simulation/gid_output
+
+**SecondPath**: second_simulation/gid_output
+
+**ResultPath**: merged_simulation
+
+And the resulting simulation will be written to a new folder:
+```dir
+first_simulation
+└── ...
+second_simulation
+└── ...
+merged_simulation
+├── merged_simulation_0.post.bin
+├── merged_simulation_0.1.post.bin
+├── merged_simulation_0.2.post.bin
+└── ...
+```
+
+What happens if one simulation takes longer than the other? This marco will combine each time step where it is present in both simulations. So, if one simulation takes longer, the extra time steps will be ignored. In that case, it is possible to specify a **DefaultTime** in order to extend the shorter simulation.
+
+In this animation, the first simulation (a landslide) has been extended with the initial configuration. Furthermore, there is a triple combination (recursive) of post-process results: the landslide simulation, the free surface simulation and the bottom mesh.
 
 ![PFEM-SW coupling](doc/landslide-flume.gif)
 
 ## See also
 
-The background of the above example is explained in [^1] and the implementation can be found [here](https://github.com/KratosMultiphysics/Kratos/blob/master/applications/ShallowWaterApplication/README.md)
+The background of the above example is explained in [^1] and the implementation can be found [here](https://github.com/KratosMultiphysics/Kratos/blob/master/applications/ShallowWaterApplication/README.md).
 
 
 [^1]: M. Masó, A. Franci, I. de-Pouplana, A. Cornejo and E. Oñate, A Lagrangian-Eulerian procedure for the coupled solution of the Navier-Stokes and shallow water equations for landslide-generated waves. Advanced Modelling and Simulation in Engineering Sciences, (2022) [10.21203/rs.3.rs-1457837/v1](https://doi.org/10.21203/rs.3.rs-1457837/v1) (in press)
