@@ -2,7 +2,7 @@
 
 A post processing tool for merging simulations with [GiD](https://www.gidsimulation.com/). From two simulations with dynamic meshes, a third simulation will be generated.
 
-Each source simulation should be stored in a folder, the node and element numbering should be different from one simulation to the other and the time labels should be the shared across the simulations. If you want to merge more simulations, it can be done recursively.
+Each source simulation should be stored in a folder. The nodes and elements numbering should be different from one simulation to the other and the time labels should be the shared across the simulations. If you want to merge more simulations, it can be done recursively.
 
 ## Usage
 
@@ -54,9 +54,9 @@ project
     └── ...
 ```
 
-What happens if one simulation is longer than the other? This marco will combine each time step where it is present in both simulations. So, if one simulation is longer, the extra time steps will be ignored. In that case, it is possible to specify a **DefaultTime** in order to extend the shorter simulation.
+*What happens if one simulation is longer than the other?* This marco will combine each time step where it is present in both simulations. So, if one simulation is longer, the extra time steps will be ignored. In this case, it is possible to specify a **Default Time** in order to extend the shorter simulation.
 
-In this animation, the first simulation (a landslide) has been extended with the initial configuration. Furthermore, there is a triple combination (recursive) of post-process results: the landslide simulation, the free surface simulation and the bottom mesh.
+In the animation below, the first simulation (a landslide) has been extended with the initial configuration. Furthermore, there is a triple combination (recursive) of post-process results: the landslide simulation, the free surface simulation and the bottom mesh.
 
 ![PFEM-SW coupling](doc/landslide-flume.gif)
 
