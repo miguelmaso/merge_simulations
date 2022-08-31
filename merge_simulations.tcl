@@ -5,6 +5,18 @@
 namespace import ::tcl::prefix
 package require struct::set
 package require tooltip
+
+
+namespace eval MergeSimulations {
+    variable percent_done
+}
+
+
+proc MergeSimulations::Init { } {
+}
+
+
+
 variable ::first_dir
 variable ::second_dir
 variable ::result_dir
@@ -17,49 +29,50 @@ if { ![info exists ::default_time_b] } {
 
 
 ## User interface
-
-set w .gid.merge_settings
-InitWindow $w "Merge simulations with dynamic meshes" MergeSettings
-if { ![winfo exists $w] } return ;# windows disabled || usemorewindows == 0
-# Definition of the widgets
-ttk::labelframe $w.paths -relief flat -text "Simulation paths"
-ttk::label  $w.paths.lfirst -text First
-ttk::entry  $w.paths.efirst -text FirstPath -width 50 -textvariable ::first_dir
-ttk::button $w.paths.bfirst -text ... -width 3 -command "selectFolder ::first_dir"
-ttk::label  $w.paths.lsecond -text Second
-ttk::entry  $w.paths.esecond -text SecondPath -width 50 -textvariable ::second_dir
-ttk::button $w.paths.bsecond -text ... -width 3 -command "selectFolder ::second_dir"
-ttk::label  $w.paths.lresult -text Result
-ttk::entry  $w.paths.eresult -text ResultPath -width 50 -textvariable ::result_dir
-ttk::button $w.paths.bresult -text ... -width 3 -command "selectFolder ::result_dir"
-ttk::labelframe $w.times -relief flat -text "Default time steps"
-ttk::label $w.times.lfirst -text First
-ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable ::default_time_a
-ttk::label $w.times.lsecond -text Second
-ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable ::default_time_b
-ttk::frame  $w.bottom
-ttk::label  $w.bottom.help  -text "?" -borderwidth 2 -relief ridge -anchor center
-ttk::button $w.bottom.merge -text Merge -command "main $w"
-# Layout of the widgets
-grid $w.paths.lfirst  $w.paths.efirst  $w.paths.bfirst  -sticky w
-grid $w.paths.lsecond $w.paths.esecond $w.paths.bsecond -sticky w
-grid $w.paths.lresult $w.paths.eresult $w.paths.bresult -sticky w
-grid $w.paths -sticky w -padx 6 -pady 6
-grid $w.times.lfirst  $w.times.efirst  -sticky w
-grid $w.times.lsecond $w.times.esecond -sticky w
-grid $w.times -sticky w -padx 6 -pady 6
-grid $w.bottom.help $w.bottom.merge
-grid $w.bottom.help -ipadx 6 -ipady 2 -padx 6
-grid $w.bottom -sticky e -padx 6 -pady 6
-grid rowconfigure $w 1 -weight 1
-grid columnconfigure $w 0 -weight 1
-# Hints for the widgets
-set msg_paths "Where to read/write the post files"
-set msg_times "If a time step is missing, it will be replaced by the specified time step.\nOtherwise, the time step will be skipped"
-set msg_help "Merge two simulations with dynamic meshes into a third simulation.\nThe id numbering should be unique and the time labels must be shared\nby both simulations"
-tooltip::tooltip $w.paths $msg_paths
-tooltip::tooltip $w.times $msg_times
-tooltip::tooltip $w.bottom.help $msg_help
+proc MergeSimulations::Merge { } {
+    set w .gid.merge_settings
+    InitWindow $w "Merge simulations with dynamic meshes" MergeSettings
+    if { ![winfo exists $w] } return ;# windows disabled || usemorewindows == 0
+    # Definition of the widgets
+    ttk::labelframe $w.paths -relief flat -text "Simulation paths"
+    ttk::label  $w.paths.lfirst -text First
+    ttk::entry  $w.paths.efirst -text FirstPath -width 50 -textvariable ::first_dir
+    ttk::button $w.paths.bfirst -text ... -width 3 -command "selectFolder ::first_dir"
+    ttk::label  $w.paths.lsecond -text Second
+    ttk::entry  $w.paths.esecond -text SecondPath -width 50 -textvariable ::second_dir
+    ttk::button $w.paths.bsecond -text ... -width 3 -command "selectFolder ::second_dir"
+    ttk::label  $w.paths.lresult -text Result
+    ttk::entry  $w.paths.eresult -text ResultPath -width 50 -textvariable ::result_dir
+    ttk::button $w.paths.bresult -text ... -width 3 -command "selectFolder ::result_dir"
+    ttk::labelframe $w.times -relief flat -text "Default time steps"
+    ttk::label $w.times.lfirst -text First
+    ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable ::default_time_a
+    ttk::label $w.times.lsecond -text Second
+    ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable ::default_time_b
+    ttk::frame  $w.bottom
+    ttk::label  $w.bottom.help  -text "?" -borderwidth 2 -relief ridge -anchor center
+    ttk::button $w.bottom.merge -text Merge -command "main $w"
+    # Layout of the widgets
+    grid $w.paths.lfirst  $w.paths.efirst  $w.paths.bfirst  -sticky w
+    grid $w.paths.lsecond $w.paths.esecond $w.paths.bsecond -sticky w
+    grid $w.paths.lresult $w.paths.eresult $w.paths.bresult -sticky w
+    grid $w.paths -sticky w -padx 6 -pady 6
+    grid $w.times.lfirst  $w.times.efirst  -sticky w
+    grid $w.times.lsecond $w.times.esecond -sticky w
+    grid $w.times -sticky w -padx 6 -pady 6
+    grid $w.bottom.help $w.bottom.merge
+    grid $w.bottom.help -ipadx 6 -ipady 2 -padx 6
+    grid $w.bottom -sticky e -padx 6 -pady 6
+    grid rowconfigure $w 1 -weight 1
+    grid columnconfigure $w 0 -weight 1
+    # Hints for the widgets
+    set msg_paths "Where to read/write the post files"
+    set msg_times "If a time step is missing, it will be replaced by the specified time step.\nOtherwise, the time step will be skipped"
+    set msg_help "Merge two simulations with dynamic meshes into a third simulation.\nThe id numbering should be unique and the time labels must be shared\nby both simulations"
+    tooltip::tooltip $w.paths $msg_paths
+    tooltip::tooltip $w.times $msg_times
+    tooltip::tooltip $w.bottom.help $msg_help
+}
 
 
 proc selectFolder {dest_var} {
@@ -182,3 +195,33 @@ proc main {w} {
     destroy $w
 }
 
+
+########################################################
+################# Plug-in registration #################
+########################################################
+
+proc MergeSimulations::AddToMenuPOST { } {   
+    if { [GidUtils::IsTkDisabled] } {
+        return
+    }
+    if { [GiDMenu::GetOptionIndex Files [list "MergeSimulations..."] POST] == -1 } {       
+        #try to insert this menu after the word "Files->Export"
+        set position [GiDMenu::GetOptionIndex Files [list "Export"] POST]
+        if { $position == -1 } {
+            set position end
+        }
+        GiDMenu::InsertOption Files [list "MergeSimulations..."] $position POST MergeSimulations::Merge "" "" insertafter _
+    }
+}
+
+
+proc MergeSimulations::AddToMenu { } {
+    MergeSimulations::AddToMenuPOST
+}
+
+
+MergeSimulations::Init
+
+# Invoke this menus changes
+MergeSimulations::AddToMenu
+GiDMenu::UpdateMenus
