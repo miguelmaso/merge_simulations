@@ -1,0 +1,8 @@
+<InfoPlugin version="1.0">
+  <Program>
+    <Name>MergeSimulations</Name>
+    <Version>1.0</Version>
+    <MinimumGiDVersion>14.0</MinimumGiDVersion>
+    <Description>GiD plugin to merge several simulations into a single file per each step.</Description>
+  </Program>
+</InfoPlugin>
