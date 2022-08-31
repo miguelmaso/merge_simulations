@@ -12,6 +12,8 @@ namespace eval MergeSimulations {
     variable first_dir
     variable second_dir
     variable result_dir
+    variable default_time_a
+    variable default_time_b
     if {![info exists default_time_a]} {
         set default_time_a 0
     }
@@ -37,6 +39,8 @@ proc MergeSimulations::Merge { } {
     variable first_dir
     variable second_dir
     variable result_dir
+    variable default_time_a
+    variable default_time_b
     # Window creation
     set w .gid.merge_settings
     InitWindow $w "Merge simulations with dynamic meshes" MergeSettings
@@ -54,9 +58,9 @@ proc MergeSimulations::Merge { } {
     ttk::button $w.paths.bresult -text ... -width 3 -command "MergeSimulations::selectFolder result_dir"
     ttk::labelframe $w.times -relief flat -text "Default time steps"
     ttk::label $w.times.lfirst -text First
-    ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable MergeSimulations::default_time_a
+    ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable default_time_a
     ttk::label $w.times.lsecond -text Second
-    ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable MergeSimulations::default_time_b
+    ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable default_time_b
     ttk::frame  $w.bottom
     ttk::label  $w.bottom.help  -text "?" -borderwidth 2 -relief ridge -anchor center
     ttk::button $w.bottom.merge -text Merge -command "MergeSimulations::executeMerge $w"
@@ -103,7 +107,9 @@ proc MergeSimulations::mergeFiles {name_a name_b out_name} {
 }
 
 
-proc MergeSimulations::mergeTimeStep {name_a name_b default_time_a default_time_b out_name time extension} {
+proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension} {
+    variable default_time_a
+    variable default_time_b
     set full_name_a $name_a$time$extension
     set full_name_b $name_b$time$extension
     set full_out_name $out_name$time$extension
@@ -132,15 +138,19 @@ proc MergeSimulations::getPathTimesList {path extension} {
 }
 
 
-proc MergeSimulations::getTimesList {first_path second_path first_default_time second_default_time extension} {
-    set times_a [getPathTimesList $first_path $extension]
-    set times_b [getPathTimesList $second_path $extension]
+proc MergeSimulations::getTimesList {extension} {
+    variable first_dir
+    variable second_dir
+    variable default_time_a
+    variable default_time_b
+    set times_a [getPathTimesList $first_dir $extension]
+    set times_b [getPathTimesList $second_dir $extension]
     set times ""
-    if {$first_default_time != "" && $second_default_time != ""} {
+    if {$default_time_a != "" && $default_time_b != ""} {
         set times [::struct::set union $times_a $times_b]
-    } elseif {$first_default_time == "" && $second_default_time == ""} {
+    } elseif {$default_time_a == "" && $default_time_b == ""} {
         set times [::struct::set intersect $times_a $times_b]
-    } elseif {$first_default_time != ""} {
+    } elseif {$default_time_a != ""} {
         set times $times_b
     } else {
         set times $times_a
@@ -176,35 +186,37 @@ proc MergeSimulations::advanceProgress {time} {
 }
 
 
-proc MergeSimulations::mergeSimulations {dir_a dir_b time_a time_b res_dir res_name extension} {
-    set times [getTimesList $dir_a $dir_b $time_a $time_b $extension]
-    set first_name [getFileName $dir_a $extension]
-    set second_name [getFileName $dir_b $extension]
-    set output_name [checkOutputFileName $res_dir $res_name]
+proc MergeSimulations::mergeSimulations {result_name extension} {
+    variable first_dir
+    variable second_dir
+    variable result_dir
+    set times [getTimesList $extension]
+    set first_name [getFileName $first_dir $extension]
+    set second_name [getFileName $second_dir $extension]
+    set output_name [checkOutputFileName $result_dir $result_name]
     initializeProgress $times
     foreach time $times {
-        mergeTimeStep $first_name $second_name $time_a $time_b $output_name $time $extension
+        mergeTimeStep $first_name $second_name $time $output_name $extension
         advanceProgress $time
     }
 }
 
 
 proc MergeSimulations::executeMerge {w} {
-    variable first_dir
-    variable second_dir
     variable result_dir
-    set MergeSimulations::percent_read 0
+    variable percent_read
+    set percent_read 0
     GiD_Process files new Yes
     GiD_Process postprocess
-    GidUtils::CreateAdvanceBar [= "Merging post-process files"] [= "Progress"] MergeSimulations::percent_read 100
+    GidUtils::CreateAdvanceBar [= "Merging post-process files"] [= "Progress"] percent_read 100
     GidUtils::DisableGraphics
     set result_name [lindex [file split $result_dir] end]
     set extension .post.bin
-    mergeSimulations $first_dir $second_dir $default_time_a $default_time_b $result_dir $result_name $extension
+    MergeSimulations::mergeSimulations $result_name $extension
     GiD_Process files new Yes
     GidUtils::EnableGraphics
     GidUtils::SetWarnLine "Files have been written to $result_dir"
-    set MergeSimulations::percent_read 100
+    set percent_read 100
     destroy $w
 }
 
