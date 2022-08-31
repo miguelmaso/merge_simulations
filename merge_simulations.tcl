@@ -8,7 +8,20 @@ package require tooltip
 
 
 namespace eval MergeSimulations {
+    # Path variables
+    variable first_dir
+    variable second_dir
+    variable result_dir
+    if {![info exists default_time_a]} {
+        set default_time_a 0
+    }
+    if {![info exists default_time_b]} {
+        set default_time_b ""
+    }
+    # Progress variables
     variable percent_done
+    variable files_read
+    variable total_files
 }
 
 
@@ -16,42 +29,37 @@ proc MergeSimulations::Init { } {
 }
 
 
+########################################################
+#################### User interface ####################
+########################################################
 
-variable ::first_dir
-variable ::second_dir
-variable ::result_dir
-if { ![info exists ::default_time_a] } {
-    set ::default_time_a 0
-}
-if { ![info exists ::default_time_b] } {
-    set ::default_time_b ""
-}
-
-
-## User interface
 proc MergeSimulations::Merge { } {
+    variable first_dir
+    variable second_dir
+    variable result_dir
+    # Window creation
     set w .gid.merge_settings
     InitWindow $w "Merge simulations with dynamic meshes" MergeSettings
     if { ![winfo exists $w] } return ;# windows disabled || usemorewindows == 0
     # Definition of the widgets
     ttk::labelframe $w.paths -relief flat -text "Simulation paths"
     ttk::label  $w.paths.lfirst -text First
-    ttk::entry  $w.paths.efirst -text FirstPath -width 50 -textvariable ::first_dir
-    ttk::button $w.paths.bfirst -text ... -width 3 -command "selectFolder ::first_dir"
+    ttk::entry  $w.paths.efirst -text FirstPath -width 50 -textvariable first_dir
+    ttk::button $w.paths.bfirst -text ... -width 3 -command "MergeSimulations::selectFolder first_dir"
     ttk::label  $w.paths.lsecond -text Second
-    ttk::entry  $w.paths.esecond -text SecondPath -width 50 -textvariable ::second_dir
-    ttk::button $w.paths.bsecond -text ... -width 3 -command "selectFolder ::second_dir"
+    ttk::entry  $w.paths.esecond -text SecondPath -width 50 -textvariable second_dir
+    ttk::button $w.paths.bsecond -text ... -width 3 -command "MergeSimulations::selectFolder second_dir"
     ttk::label  $w.paths.lresult -text Result
-    ttk::entry  $w.paths.eresult -text ResultPath -width 50 -textvariable ::result_dir
-    ttk::button $w.paths.bresult -text ... -width 3 -command "selectFolder ::result_dir"
+    ttk::entry  $w.paths.eresult -text ResultPath -width 50 -textvariable result_dir
+    ttk::button $w.paths.bresult -text ... -width 3 -command "MergeSimulations::selectFolder result_dir"
     ttk::labelframe $w.times -relief flat -text "Default time steps"
     ttk::label $w.times.lfirst -text First
-    ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable ::default_time_a
+    ttk::entry $w.times.efirst -text FirstTime -width 10 -textvariable MergeSimulations::default_time_a
     ttk::label $w.times.lsecond -text Second
-    ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable ::default_time_b
+    ttk::entry $w.times.esecond -text SecondTime -width 10 -textvariable MergeSimulations::default_time_b
     ttk::frame  $w.bottom
     ttk::label  $w.bottom.help  -text "?" -borderwidth 2 -relief ridge -anchor center
-    ttk::button $w.bottom.merge -text Merge -command "main $w"
+    ttk::button $w.bottom.merge -text Merge -command "MergeSimulations::executeMerge $w"
     # Layout of the widgets
     grid $w.paths.lfirst  $w.paths.efirst  $w.paths.bfirst  -sticky w
     grid $w.paths.lsecond $w.paths.esecond $w.paths.bsecond -sticky w
@@ -75,7 +83,7 @@ proc MergeSimulations::Merge { } {
 }
 
 
-proc selectFolder {dest_var} {
+proc MergeSimulations::selectFolder {dest_var} {
     upvar $dest_var d
     set directory [MessageBoxGetFilename directory read "Select a folder" ""]
     if {$directory != ""} {
@@ -84,16 +92,18 @@ proc selectFolder {dest_var} {
 }
 
 
-## Procedures for merging results
+########################################################
+################### Merge procedures ###################
+########################################################
 
-proc mergeFiles {name_a name_b out_name} {
+proc MergeSimulations::mergeFiles {name_a name_b out_name} {
     GiD_Process files read $name_a
     GiD_Process files add $name_b
     GiD_Process files saveall binMeshesSets $out_name
 }
 
 
-proc mergeTimeStep {name_a name_b default_time_a default_time_b out_name time extension} {
+proc MergeSimulations::mergeTimeStep {name_a name_b default_time_a default_time_b out_name time extension} {
     set full_name_a $name_a$time$extension
     set full_name_b $name_b$time$extension
     set full_out_name $out_name$time$extension
@@ -109,7 +119,7 @@ proc mergeTimeStep {name_a name_b default_time_a default_time_b out_name time ex
 }
 
 
-proc getPathTimesList {path extension} {
+proc MergeSimulations::getPathTimesList {path extension} {
     set files_list [glob [file join $path *$extension]]
     set common_prefix [prefix longest $files_list ""]
     set times ""
@@ -122,7 +132,7 @@ proc getPathTimesList {path extension} {
 }
 
 
-proc getTimesList {first_path second_path first_default_time second_default_time extension} {
+proc MergeSimulations::getTimesList {first_path second_path first_default_time second_default_time extension} {
     set times_a [getPathTimesList $first_path $extension]
     set times_b [getPathTimesList $second_path $extension]
     set times ""
@@ -139,14 +149,14 @@ proc getTimesList {first_path second_path first_default_time second_default_time
 }
 
 
-proc getFileName {path extension} {
+proc MergeSimulations::getFileName {path extension} {
     set files_list [glob [file join $path *$extension]]
     set common_prefix [prefix longest $files_list ""]
     return $common_prefix
 }
 
 
-proc checkOutputFileName {output_path name} {
+proc MergeSimulations::checkOutputFileName {output_path name} {
     if {![file exist $output_path]} {
         file mkdir $output_path
     }
@@ -155,18 +165,18 @@ proc checkOutputFileName {output_path name} {
 }
 
 
-proc initializeProgress {times} {
-    set ::files_read 0
-    set ::total_files [llength $times]
+proc MergeSimulations::initializeProgress {times} {
+    set MergeSimulations::files_read 0
+    set MergeSimulations::total_files [llength $times]
 }
 
 
-proc advanceProgress {time} {
-    set ::percentage [expr {100 * [incr ::files_read] / $::total_files}]
+proc MergeSimulations::advanceProgress {time} {
+    set MergeSimulations::percent_read [expr {100 * [incr MergeSimulations::files_read] / $MergeSimulations::total_files}]
 }
 
 
-proc mergeSimulations {dir_a dir_b time_a time_b res_dir res_name extension} {
+proc MergeSimulations::mergeSimulations {dir_a dir_b time_a time_b res_dir res_name extension} {
     set times [getTimesList $dir_a $dir_b $time_a $time_b $extension]
     set first_name [getFileName $dir_a $extension]
     set second_name [getFileName $dir_b $extension]
@@ -179,19 +189,22 @@ proc mergeSimulations {dir_a dir_b time_a time_b res_dir res_name extension} {
 }
 
 
-proc main {w} {
-    set ::percentage 0
+proc MergeSimulations::executeMerge {w} {
+    variable first_dir
+    variable second_dir
+    variable result_dir
+    set MergeSimulations::percent_read 0
     GiD_Process files new Yes
     GiD_Process postprocess
-    GidUtils::CreateAdvanceBar [= "Merging post-process files"] [= "Progress"] ::percentage 100
+    GidUtils::CreateAdvanceBar [= "Merging post-process files"] [= "Progress"] MergeSimulations::percent_read 100
     GidUtils::DisableGraphics
-    set result_name [lindex [file split $::result_dir] end]
+    set result_name [lindex [file split $result_dir] end]
     set extension .post.bin
-    mergeSimulations $::first_dir $::second_dir $::default_time_a $::default_time_b $::result_dir $result_name $extension
+    mergeSimulations $first_dir $second_dir $default_time_a $default_time_b $result_dir $result_name $extension
     GiD_Process files new Yes
     GidUtils::EnableGraphics
-    GidUtils::SetWarnLine "Files have been written to $::result_dir"
-    set ::percentage 100
+    GidUtils::SetWarnLine "Files have been written to $result_dir"
+    set MergeSimulations::percent_read 100
     destroy $w
 }
 
@@ -205,7 +218,7 @@ proc MergeSimulations::AddToMenuPOST { } {
         return
     }
     if { [GiDMenu::GetOptionIndex Files [list "MergeSimulations..."] POST] == -1 } {       
-        #try to insert this menu after the word "Files->Export"
+        # Try to insert this menu after the word "Files->Export"
         set position [GiDMenu::GetOptionIndex Files [list "Export"] POST]
         if { $position == -1 } {
             set position end
