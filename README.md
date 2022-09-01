@@ -6,8 +6,13 @@ Each source simulation should be stored in a folder. The nodes and elements numb
 
 ## Usage
 
-1. Download into the `gid-xx/plugins` folder
-2. Launch GiD and go to *postprocess*: From the *File* menu, click *Merge simulations...*
+1. Download this repository into the `gid-xx/plugins` folder
+
+```shell
+cd path/to/gid/plugins
+git clone https://github.com/miguelmaso/merge_simulations.git
+```
+2. Launch GiD and switch to *postprocess*. From the *File* menu, click *Merge simulations...*
 3. Fill this form and click *Merge*:
 
    ![form](doc/form.png)
@@ -15,7 +20,7 @@ Each source simulation should be stored in a folder. The nodes and elements numb
 
 ## Examples
 
-Lets consider the following structure:
+Let consider the following structure:
 ```
 project
 ├── first_simulation
