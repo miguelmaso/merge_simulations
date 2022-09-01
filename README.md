@@ -65,9 +65,14 @@ In the animation below, the first simulation (a landslide) has been extended wit
 
 ![PFEM-SW coupling](doc/landslide-flume.gif)
 
+## Known issues
+
+- The extension isn't exported to the user interface and it is restricted to `.post.bin`.
+- The use of a *default time* throws warnings related to the duplication of several steps. Moreover, the extended steps contain the mesh information without results.
+
 ## See also
 
-The background of the above example is explained in [^1] and the implementation can be found [here](https://github.com/KratosMultiphysics/Kratos/blob/master/applications/ShallowWaterApplication/README.md).
+The background of the above example is explained in [^1] and the implementation can be found [here](https://github.com/KratosMultiphysics/Kratos/blob/master/applications/ShallowWaterApplication).
 
 
 [^1]: M. Masó, A. Franci, I. de-Pouplana, A. Cornejo and E. Oñate, A Lagrangian-Eulerian procedure for the coupled solution of the Navier-Stokes and shallow water equations for landslide-generated waves. Advanced Modelling and Simulation in Engineering Sciences, (2022) [10.21203/rs.3.rs-1457837/v1](https://doi.org/10.21203/rs.3.rs-1457837/v1) (in press)
