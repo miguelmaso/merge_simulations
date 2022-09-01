@@ -31,7 +31,7 @@ namespace eval MergeSimulations {
 ########################################################
 
 proc MergeSimulations::Merge { } {
-    # Window creation
+    # Create a user interface and execute the main procedure
     set w .gid.merge_settings
     InitWindow $w "Merge simulations with dynamic meshes" MergeSettings
     if { ![winfo exists $w] } return ;# windows disabled || usemorewindows == 0
@@ -90,6 +90,9 @@ proc MergeSimulations::selectFolder {dest_var} {
 
 proc MergeSimulations::mergeFiles {name_a name_b out_name} {
     # Merge two simulations given the full names with a time stamp
+    #  name_a - The full path of the first simulation
+    #  name_b - The full path of the second simulation
+    #  out_name - The full path of the merged simulation
     GiD_Process files read $name_a
     GiD_Process files add $name_b
     GiD_Process files saveall binMeshesSets $out_name
@@ -97,7 +100,11 @@ proc MergeSimulations::mergeFiles {name_a name_b out_name} {
 
 proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension} {
     # Merge two simulations at the specified time
-    # 
+    #  name_a - The path and file name pattern of the first simulation
+    #  name_b - The path and file name pattern of the second simulation
+    #  time - the time stamp to be added to the files patterns
+    #  out_name - The path and file name pattern of the merged simulation
+    #  extension - the postprocess files extension
     set full_name_a $name_a$time$extension
     set full_name_b $name_b$time$extension
     set full_out_name $out_name$time$extension
@@ -115,6 +122,8 @@ proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension} {
 
 proc MergeSimulations::getPathTimesList {path extension} {
     # Get all the time stamps inside a folder with a given extension
+    #  path - where to glob the files
+    #  extension - the postprocess files extension
     set files_list [glob [file join $path *$extension]]
     set common_prefix [prefix longest $files_list ""]
     set times ""
@@ -127,7 +136,9 @@ proc MergeSimulations::getPathTimesList {path extension} {
 }
 
 proc MergeSimulations::getTimesList {extension} {
-    # Ge the common time stapms from two directories. If a default time is present the intersection will be extended
+    # Get the common time stapms from two directories.
+    # If a default time is present the intersection will be extended
+    #  extension - the postprocess files extension
     set times_a [getPathTimesList $MergeSimulations::first_dir $extension]
     set times_b [getPathTimesList $MergeSimulations::second_dir $extension]
     set times ""
@@ -144,12 +155,18 @@ proc MergeSimulations::getTimesList {extension} {
 }
 
 proc MergeSimulations::getFileName {path extension} {
+    # Get the common part of the file names inside a path with a given extension
+    #  path - where to glob the files
+    #  extension - the postprocess files extension
     set files_list [glob [file join $path *$extension]]
     set common_prefix [prefix longest $files_list ""]
     return $common_prefix
 }
 
 proc MergeSimulations::checkOutputFileName {output_path name} {
+    # Check if the output path exists and append the join character before the time stamp
+    #  output_path - the folder where to store the merged simulations
+    #  name - the base name for the merged simulations
     if {![file exist $output_path]} {
         file mkdir $output_path
     }
@@ -158,18 +175,23 @@ proc MergeSimulations::checkOutputFileName {output_path name} {
 }
 
 proc MergeSimulations::initializeProgress {times} {
+    # Initialize the progress bar
+    #  times - the list of time stamps to merge
     set MergeSimulations::files_read 0
     set MergeSimulations::total_files [llength $times]
 }
 
 proc MergeSimulations::advanceProgress {time} {
+    # Advance the progress bar according to the current time stamp
+    #  time - the current time stamp
     set MergeSimulations::percent_read [expr {100 * [incr MergeSimulations::files_read] / $MergeSimulations::total_files}]
 }
 
 proc MergeSimulations::mergeSimulations {result_name extension} {
-    # Get the list of steps/times
+    # Merge two simulations from the paths specified from the widget
+    #  result_name - the name of the merged simulation
+    #  extension - the postprocess files extension
     set times [getTimesList $extension]
-    # Get the names of the files without the time stamp
     set first_name [getFileName $MergeSimulations::first_dir $extension]
     set second_name [getFileName $MergeSimulations::second_dir $extension]
     set output_name [checkOutputFileName $MergeSimulations::result_dir $result_name]
@@ -182,7 +204,9 @@ proc MergeSimulations::mergeSimulations {result_name extension} {
 }
 
 proc MergeSimulations::executeMerge {w} {
-    # Clean the window, initialize the progress bar and disable the graphics
+    # Main procedure for merging simulations.
+    # Clean the workspace, set a progress bar and disable the graphics during the execution
+    #  w - the widget instance
     GiD_Process files new Yes
     set MergeSimulations::percent_read 0
     GidUtils::CreateAdvanceBar [= "Merging post-process files"] [= "Progress"] MergeSimulations::percent_read 100
