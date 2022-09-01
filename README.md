@@ -6,16 +6,21 @@ Each source simulation should be stored in a folder. The nodes and elements numb
 
 ## Usage
 
-1. Download
-2. Type the following command in GiD: `-np- source /path/to/merge.tcl`
-3. Fill this form and click *merge*:
+1. Download this repository into the `gid-xx/plugins` folder
+
+```shell
+cd path/to/gid/plugins
+git clone https://github.com/miguelmaso/merge_simulations.git
+```
+2. Launch GiD and switch to *postprocess*. From the *File* menu, click *Merge simulations...*
+3. Fill this form and click *Merge*:
 
    ![form](doc/form.png)
-4. From GiD, click *open multiple* to read the new files
+4. From the *File* menu, click *open multiple* to read the new files
 
 ## Examples
 
-Imagine we have the following structure:
+Let consider the following structure:
 ```
 project
 ├── first_simulation
@@ -40,7 +45,7 @@ Then, a possible configuration could be the next:
 - **Second path**: second_simulation/gid_output
 - **Result path**: merged_simulation
 
-And the resulting simulation will be written to a new folder:
+And the resulting simulation would be written to a new folder:
 ```
 project
 ├── first_simulation
@@ -54,7 +59,7 @@ project
     └── ...
 ```
 
-*What happens if one simulation is longer than the other?* This marco will combine each time step where it is present in both simulations. So, if one simulation is longer, the extra time steps will be ignored. In this case, it is possible to specify a **Default Time** in order to extend the shorter simulation.
+*What happens if one simulation is longer than the other?* This marco will combine each time step where it is present in both simulations. So, if one simulation takes longer, the extra time steps will be ignored. In this case, it is possible to specify a **Default Time** in order to extend the shorter simulation.
 
 In the animation below, the first simulation (a landslide) has been extended with the initial configuration. Furthermore, there is a triple combination (recursive) of post-process results: the landslide simulation, the free surface simulation and the bottom mesh.
 
