@@ -1,8 +1,6 @@
 # author: Miguel Masó Sotomayor
 # https://github.com/miguelmaso/merge_simulations
 
-
-namespace import ::tcl::prefix
 package require struct::set
 package require tooltip
 
@@ -54,7 +52,7 @@ proc MergeSimulations::Merge { } {
     ttk::frame  $w.bottom
     ttk::label  $w.bottom.help  -text "?" -borderwidth 2 -relief ridge -anchor center
     ttk::button $w.bottom.merge -text Merge -command "MergeSimulations::executeMerge $w"
-    # Layout of the widgets
+    # Widgets layout
     grid $w.paths.lfirst  $w.paths.efirst  $w.paths.bfirst  -sticky w
     grid $w.paths.lsecond $w.paths.esecond $w.paths.bsecond -sticky w
     grid $w.paths.lresult $w.paths.eresult $w.paths.bresult -sticky w
@@ -77,6 +75,8 @@ proc MergeSimulations::Merge { } {
 }
 
 proc MergeSimulations::selectFolder {dest_var} {
+    # Popout a folder selection dialog
+    #  dest_var - where to store the selected folder
     upvar $dest_var d
     set directory [MessageBoxGetFilename directory read "Select a folder" ""]
     if {$directory != ""} {
@@ -125,7 +125,7 @@ proc MergeSimulations::getPathTimesList {path extension} {
     #  path - where to glob the files
     #  extension - the postprocess files extension
     set files_list [glob [file join $path *$extension]]
-    set common_prefix [prefix longest $files_list ""]
+    set common_prefix [::tcl::prefix longest $files_list ""]
     set times ""
     foreach filename $files_list {
         set current_time [string map [list $common_prefix ""] $filename]
@@ -159,7 +159,7 @@ proc MergeSimulations::getFileName {path extension} {
     #  path - where to glob the files
     #  extension - the postprocess files extension
     set files_list [glob [file join $path *$extension]]
-    set common_prefix [prefix longest $files_list ""]
+    set common_prefix [::tcl::prefix longest $files_list ""]
     return $common_prefix
 }
 
@@ -227,11 +227,12 @@ proc MergeSimulations::executeMerge {w} {
 ################# Plug-in registration #################
 ########################################################
 
-proc MergeSimulations::AddToMenu { } {   
+proc MergeSimulations::AddToMenu { } {
+    # Add the plugin to the Files menu
     if { [GidUtils::IsTkDisabled] } {
         return
     }
-    if { [GiDMenu::GetOptionIndex Files [list "Merge simulations..."] POST] == -1 } {       
+    if { [GiDMenu::GetOptionIndex Files [list "Merge simulations..."] POST] == -1 } {
         # Try to insert this menu after the word "Files->Export"
         set position [GiDMenu::GetOptionIndex Files [list "Export"] POST]
         if { $position == -1 } {
