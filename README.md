@@ -16,7 +16,7 @@ git clone https://github.com/miguelmaso/merge_simulations.git
 3. Fill this form and click *Merge*:
 
    ![form](doc/form.png)
-4. From the *File* menu, click *open multiple* to read the new files
+4. From the *File* menu, click *Open...* to read the new files
 
 ## Examples
 
