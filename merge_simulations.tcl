@@ -88,7 +88,7 @@ proc MergeSimulations::selectFolder {dest_var} {
 ################### Merge procedures ###################
 ########################################################
 
-proc MergeSimulations::mergeFiles {name_a name_b out_name} {
+proc MergeSimulations::mergeFiles {name_a name_b out_name list_file} {
     # Merge two simulations given the full names with a time stamp
     #  name_a - The full path of the first simulation
     #  name_b - The full path of the second simulation
@@ -96,9 +96,10 @@ proc MergeSimulations::mergeFiles {name_a name_b out_name} {
     GiD_Process files read $name_a
     GiD_Process files add $name_b
     GiD_Process files saveall binMeshesSets $out_name
+    appendToListFile $list_file $out_name
 }
 
-proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension} {
+proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension list_file} {
     # Merge two simulations at the specified time
     #  name_a - The path and file name pattern of the first simulation
     #  name_b - The path and file name pattern of the second simulation
@@ -109,13 +110,13 @@ proc MergeSimulations::mergeTimeStep {name_a name_b time out_name extension} {
     set full_name_b $name_b$time$extension
     set full_out_name $out_name$time$extension
     if {[file exist $full_name_a] && [file exist $full_name_b]} { # First case: both files exist
-        mergeFiles $full_name_a $full_name_b $full_out_name
+        mergeFiles $full_name_a $full_name_b $full_out_name $list_file
     } elseif {![file exist $full_name_a] && $MergeSimulations::default_time_a != ""} { # Second case: replace the first file by the default time
         set full_name_a $name_a$MergeSimulations::default_time_a$extension
-        mergeFiles $full_name_a $full_name_b $full_out_name
+        mergeFiles $full_name_a $full_name_b $full_out_name $list_file
     } elseif {![file exist $full_name_b] && $MergeSimulations::default_time_b != ""} { # Third case: replace the second file by the default time
         set full_name_b $name_b$MergeSimulations::default_time_b$extension
-        mergeFiles $full_name_a $full_name_b $full_out_name
+        mergeFiles $full_name_a $full_name_b $full_out_name $list_file
     }
     # Fourth case: skip this time step
 }
@@ -151,7 +152,7 @@ proc MergeSimulations::getTimesList {extension} {
     } else {
         set times $times_a
     }
-    return $times
+    return [lsort -real $times]
 }
 
 proc MergeSimulations::getFileName {path extension} {
@@ -172,6 +173,23 @@ proc MergeSimulations::checkOutputFileName {output_path name} {
     }
     set join_character _
     return [file join $output_path $name$join_character]
+}
+
+proc MergeSimulations::initializeListFile {list_name} {
+    # Open the list file and write the header
+    #  list_name - the name of the list file
+    set filename [file join $MergeSimulations::result_dir $list_name].post.lst
+    set list_file [open $filename w]
+    puts $list_file Multiple
+    return $list_file
+}
+
+proc MergeSimulations::appendToListFile {list_file filename} {
+    # Append the file name to the list file using the relative path
+    #  list_file - the list file
+    #  filename - the name of the simulation file
+    set filename [lindex [file split $filename] end]
+    puts $list_file $filename
 }
 
 proc MergeSimulations::initializeProgress {times} {
@@ -197,10 +215,12 @@ proc MergeSimulations::mergeSimulations {result_name extension} {
     set output_name [checkOutputFileName $MergeSimulations::result_dir $result_name]
     # Merge each step
     initializeProgress $times
+    set list_file [initializeListFile $result_name]
     foreach time $times {
-        mergeTimeStep $first_name $second_name $time $output_name $extension
+        mergeTimeStep $first_name $second_name $time $output_name $extension $list_file
         advanceProgress $time
     }
+    close $list_file
 }
 
 proc MergeSimulations::executeMerge {w} {
